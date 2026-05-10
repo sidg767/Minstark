@@ -1,5 +1,5 @@
-use crate::{air::HashChainAir, trace::Trace, field::F};
-use crate::merkle::{MerkleTree, MerkleProof};
+use crate::merkle::{MerkleProof, MerkleTree};
+use crate::{air::HashChainAir, field::F, trace::Trace};
 pub struct Prover {
     air: HashChainAir,
 }
@@ -31,30 +31,31 @@ impl Prover {
         }
     }
 }
-pub struct Proof{
-pub root:F,
-pub merkle_paths: Vec<MerkleProof>,
-pub length:usize,
+pub struct Proof {
+    pub root: F,
+    pub merkle_paths: Vec<MerkleProof>,
+    pub length: usize,
 }
-mod tests{
-use super::*;
-use crate::field::BaseElement as F;
-use crate::hash_chain::HashChain;
-use crate::trace::Trace;
-#[test]
-fn test_prover(){
-let seed=F::new(1);
-let mut chain = HashChain::new(seed);
-let inputs = vec![F::new(2), F::new(3)];
-for &inp in &inputs{
-chain.append(inp);
-}
-let trace = Trace::from_hash_chain(&chain);
-let prover = Prover::new(trace.length);
-let proof = prover.prove(&trace, &inputs);
-assert_eq!(proof.length, trace.length);
-println!("Proof root: {}", proof.root);
-println!("Merkle path count = {}", proof.merkle_paths.len());
-assert_eq!(proof.merkle_paths.len(), trace.length);
-}
+mod tests {
+    use super::*;
+    
+    use crate::hash_chain::HashChain;
+    use crate::trace::Trace;
+
+    #[test]
+    fn test_prover() {
+        let seed = F::new(1);
+        let mut chain = HashChain::new(seed);
+        let inputs = vec![F::new(2), F::new(3)];
+        for &inp in &inputs {
+            chain.append(inp);
+        }
+        let trace = Trace::from_hash_chain(&chain);
+        let prover = Prover::new(trace.length);
+        let proof = prover.prove(&trace, &inputs);
+        assert_eq!(proof.length, trace.length);
+        println!("Proof root: {}", proof.root);
+        println!("Merkle path count = {}", proof.merkle_paths.len());
+        assert_eq!(proof.merkle_paths.len(), trace.length);
+    }
 }
