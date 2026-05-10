@@ -7,9 +7,7 @@ pub struct HashChain {
 
 impl HashChain {
     pub fn new(seed: F) -> Self {
-        Self {
-            trace: vec![seed],
-        }
+        Self { trace: vec![seed] }
     }
 
     pub fn append(&mut self, value: F) {

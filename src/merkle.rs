@@ -1,7 +1,7 @@
 use crate::{field::F, poseidon::poseidon_hash2};
 pub struct MerkleTree {
     leaves: Vec<F>,
-    nodes: Vec<Vec<F>>,       // nodes[level][index]
+    nodes: Vec<Vec<F>>, // nodes[level][index]
     root: F,
 }
 
@@ -60,7 +60,7 @@ impl MerkleTree {
         let mut path = Vec::new();
 
         for level in 0..(self.nodes.len() - 1) {
-            let sibling = if index % 2 == 0 {
+            let sibling = if index.is_multiple_of(2) {
                 self.nodes[level][index + 1]
             } else {
                 self.nodes[level][index - 1]
@@ -69,7 +69,10 @@ impl MerkleTree {
             index /= 2;
         }
 
-        MerkleProof { path, index: leaf_index }
+        MerkleProof {
+            path,
+            index: leaf_index,
+        }
     }
 
     /// Verify a Merkle proof for a given leaf.
@@ -78,7 +81,7 @@ impl MerkleTree {
         let mut idx = proof.index;
 
         for sibling in &proof.path {
-            if idx % 2 == 0 {
+            if idx.is_multiple_of(2) {
                 hash = poseidon_hash2(hash, *sibling);
             } else {
                 hash = poseidon_hash2(*sibling, hash);
