@@ -1,13 +1,9 @@
+use crate::field_traits::{FieldElement, StarkField};
+use core::convert::TryFrom;
 use core::{
     fmt,
-    ops::{
-        Add, AddAssign, Sub, SubAssign,
-        Mul, MulAssign, Div, DivAssign,
-        Neg,
-    },
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
-use core::convert::TryFrom;
-use crate::field_traits::{FieldElement, StarkField};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct BaseElement(pub u64);
 impl fmt::Display for BaseElement {
@@ -17,30 +13,30 @@ impl fmt::Display for BaseElement {
 }
 impl From<u8> for BaseElement {
     fn from(x: u8) -> Self {
-        BaseElement(x as u64)
+        BaseElement::new(x as u64)
     }
 }
 impl From<u16> for BaseElement {
     fn from(x: u16) -> Self {
-        BaseElement(x as u64)
+        BaseElement::new(x as u64)
     }
 }
 impl From<u32> for BaseElement {
     fn from(x: u32) -> Self {
-        BaseElement(x as u64)
+        BaseElement::new(x as u64)
     }
 }
 impl TryFrom<u64> for BaseElement {
     type Error = &'static str;
     fn try_from(x: u64) -> Result<Self, Self::Error> {
-        Ok(BaseElement(x))
+        Ok(BaseElement::new(x))
     }
 }
 impl TryFrom<u128> for BaseElement {
     type Error = &'static str;
     fn try_from(x: u128) -> Result<Self, Self::Error> {
         if x <= u64::MAX as u128 {
-            Ok(BaseElement(x as u64))
+            Ok(BaseElement::new(x as u64))
         } else {
             Err("value too large for BaseElement")
         }
@@ -49,21 +45,24 @@ impl TryFrom<u128> for BaseElement {
 impl Add for BaseElement {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        BaseElement(self.0.wrapping_add(rhs.0))
+        let sum = self.0 as u128 + rhs.0 as u128;
+        BaseElement((sum % Self::MODULUS as u128) as u64)
     }
 }
 
 impl Sub for BaseElement {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        BaseElement(self.0.wrapping_sub(rhs.0))
+        let diff = (self.0 as u128 + Self::MODULUS as u128 - rhs.0 as u128) % Self::MODULUS as u128;
+        BaseElement(diff as u64)
     }
 }
 
 impl Mul for BaseElement {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self {
-        BaseElement(self.0.wrapping_mul(rhs.0))
+        let product = self.0 as u128 * rhs.0 as u128;
+        BaseElement((product % Self::MODULUS as u128) as u64)
     }
 }
 
@@ -76,7 +75,7 @@ impl Div for BaseElement {
 impl Neg for BaseElement {
     type Output = Self;
     fn neg(self) -> Self {
-        BaseElement(0).sub(self)
+        BaseElement::ZERO - self
     }
 }
 impl AddAssign for BaseElement {
@@ -109,11 +108,11 @@ impl FieldElement for BaseElement {
 
     fn inv(self) -> Self {
         assert!(self.0 != 0, "cannot invert zero");
-        BaseElement(1)
+        self.pow(Self::MODULUS - 2)
     }
 }
 impl StarkField for BaseElement {
-    const MODULUS: Self::PositiveInteger = u64::MAX;
+    const MODULUS: Self::PositiveInteger = 18446744073709551557;
     const MODULUS_BITS: u32 = 64;
 
     const GENERATOR: Self = BaseElement(7);
@@ -137,7 +136,7 @@ pub type F = BaseElement;
 impl BaseElement {
     #[inline]
     pub fn new(x: u64) -> Self {
-        BaseElement(x)
+        BaseElement(x % Self::MODULUS)
     }
 
     #[inline]

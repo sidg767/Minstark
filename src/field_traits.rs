@@ -1,11 +1,11 @@
-use std::vec::Vec;
+#![allow(dead_code)]
+
+use core::convert::TryFrom;
 use core::{
     fmt::{Debug, Display},
-    ops::{
-        Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Shl, Shr, Sub, SubAssign,
-    },
+    ops::{Add, AddAssign, BitAnd, Div, DivAssign, Mul, MulAssign, Neg, Shl, Shr, Sub, SubAssign},
 };
-use core::convert::TryFrom;
+use std::vec::Vec;
 pub trait FieldElement:
     Copy
     + Clone
@@ -88,10 +88,7 @@ pub trait StarkField: FieldElement<BaseField = Self> {
     fn as_int(&self) -> Self::PositiveInteger;
     fn get_root_of_unity(n: u32) -> Self {
         assert!(n != 0, "n must be non-zero");
-        assert!(
-            n <= Self::TWO_ADICITY,
-            "n exceeds field two-adicity"
-        );
+        assert!(n <= Self::TWO_ADICITY, "n exceeds field two-adicity");
 
         let power = 1u64 << (Self::TWO_ADICITY - n);
         Self::TWO_ADIC_ROOT_OF_UNITY.pow(power)
