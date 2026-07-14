@@ -1,19 +1,4 @@
-mod air;
-mod field;
-mod field_traits;
-mod hash_chain;
-mod merkle;
-mod poseidon;
-mod poseidon_constants;
-mod prover;
-mod trace;
-mod verifier;
-
-use crate::field::F;
-use crate::hash_chain::HashChain;
-use crate::prover::Prover;
-use crate::trace::Trace;
-use crate::verifier::Verifier;
+use minstark::{F, HashChain, Prover, Trace, Verifier};
 
 fn main() {
     let seed = F::new(1);
