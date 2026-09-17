@@ -6,6 +6,7 @@ pub struct MerkleTree {
 }
 
 /// A Merkle authentication path for a single leaf.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MerkleProof {
     pub path: Vec<F>,
     pub index: usize,

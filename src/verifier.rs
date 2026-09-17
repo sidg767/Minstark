@@ -11,7 +11,6 @@ impl Verifier {
         proof: &Proof,
         expected_root: F,
         expected_length: usize,
-        trace_values: &[F],
         inputs: &[F],
     ) -> bool {
         if proof.length != expected_length {
@@ -20,15 +19,17 @@ impl Verifier {
         if proof.root != expected_root {
             return false;
         }
-        if trace_values.len() != expected_length {
+        if proof.openings.len() != expected_length {
             return false;
         }
-        for i in 0..proof.length {
-            let leaf = trace_values[i];
-            let path = &proof.merkle_paths[i];
-            if !MerkleTree::verify(proof.root, leaf, path) {
+        let mut trace_values = Vec::with_capacity(proof.openings.len());
+        for (index, opening) in proof.openings.iter().enumerate() {
+            if opening.proof.index != index
+                || !MerkleTree::verify(proof.root, opening.value, &opening.proof)
+            {
                 return false;
             }
+            trace_values.push(opening.value);
         }
         let trace = crate::trace::Trace {
             values: trace_values.to_vec(),
@@ -56,8 +57,25 @@ mod tests {
         let prover = Prover::new(trace.length);
         let proof = prover.prove(&trace, &inputs);
         let verifier = Verifier::new();
-        let valid = verifier.verify(&proof, proof.root, trace.length, &trace.values, &inputs);
+        let valid = verifier.verify(&proof, proof.root, trace.length, &inputs);
         assert!(valid);
+    }
+
+    #[test]
+    fn test_verifier_rejects_tampered_opening() {
+        let seed = F::new(1);
+        let mut chain = HashChain::new(seed);
+        let inputs = vec![F::new(2), F::new(3)];
+        for &input in &inputs {
+            chain.append(input);
+        }
+        let trace = Trace::from_hash_chain(&chain);
+        let prover = Prover::new(trace.length);
+        let mut proof = prover.prove(&trace, &inputs);
+        proof.openings[1].value += F::new(1);
+
+        let verifier = Verifier::new();
+        assert!(!verifier.verify(&proof, proof.root, trace.length, &inputs));
     }
 }
 #[test]
@@ -79,5 +97,5 @@ fn test_end_to_end_proof() {
     let proof = prover.prove(&trace, &inputs);
 
     let verifier = Verifier::new();
-    assert!(verifier.verify(&proof, proof.root, trace.length, &trace.values, &inputs));
+    assert!(verifier.verify(&proof, proof.root, trace.length, &inputs));
 }

@@ -23,7 +23,7 @@ fn main() {
     println!("  root   : {}", proof.root);
     println!("  length : {}", proof.length);
     let verifier = Verifier::new();
-    let ok = verifier.verify(&proof, proof.root, trace.length, &trace.values, &inputs);
+    let ok = verifier.verify(&proof, proof.root, trace.length, &inputs);
     println!(
         "\nverifier result: {}",
         if ok { "ACCEPTED" } else { "REJECTED" }

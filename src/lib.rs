@@ -11,6 +11,6 @@ mod verifier;
 
 pub use crate::field::F;
 pub use crate::hash_chain::HashChain;
-pub use crate::prover::Prover;
+pub use crate::prover::{Proof, Prover, TraceOpening};
 pub use crate::trace::Trace;
 pub use crate::verifier::Verifier;

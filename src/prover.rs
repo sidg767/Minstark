@@ -19,21 +19,31 @@ impl Prover {
 
         let tree = MerkleTree::new(trace.values.clone());
         let root = tree.root();
-        let mut paths = Vec::new();
+        let mut openings = Vec::new();
         for i in 0..trace.values.len() {
-            paths.push(tree.prove(i));
+            openings.push(TraceOpening {
+                value: trace.values[i],
+                proof: tree.prove(i),
+            });
         }
 
         Proof {
             root,
-            merkle_paths: paths,
+            openings,
             length: trace.length,
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TraceOpening {
+    pub value: F,
+    pub proof: MerkleProof,
+}
+
 pub struct Proof {
     pub root: F,
-    pub merkle_paths: Vec<MerkleProof>,
+    pub openings: Vec<TraceOpening>,
     pub length: usize,
 }
 mod tests {
@@ -55,7 +65,7 @@ mod tests {
         let proof = prover.prove(&trace, &inputs);
         assert_eq!(proof.length, trace.length);
         println!("Proof root: {}", proof.root);
-        println!("Merkle path count = {}", proof.merkle_paths.len());
-        assert_eq!(proof.merkle_paths.len(), trace.length);
+        println!("Trace opening count = {}", proof.openings.len());
+        assert_eq!(proof.openings.len(), trace.length);
     }
 }
