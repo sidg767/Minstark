@@ -6,11 +6,13 @@ mod merkle;
 mod poseidon;
 mod poseidon_constants;
 mod prover;
+mod stark;
 mod trace;
 mod verifier;
 
 pub use crate::field::F;
 pub use crate::hash_chain::HashChain;
 pub use crate::prover::{Proof, Prover, TraceOpening};
+pub use crate::stark::{StarkConfig, StarkProof};
 pub use crate::trace::Trace;
 pub use crate::verifier::Verifier;
