@@ -9,7 +9,11 @@ impl HashChainAir {
         Self { trace_len }
     }
     pub fn evaluate_transition(&self, trace: &Trace, inputs: &[F]) -> Vec<F> {
-        assert_eq!(inputs.len(), trace.length.saturating_sub(1), "input length mismatch");
+        assert_eq!(
+            inputs.len(),
+            trace.length.saturating_sub(1),
+            "input length mismatch"
+        );
         let mut constraints = Vec::with_capacity(trace.length.saturating_sub(1));
         for i in 0..(trace.length - 1) {
             let expected = crate::poseidon::poseidon_hash2(trace.get_row(i), inputs[i]);

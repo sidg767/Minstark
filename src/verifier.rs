@@ -1,11 +1,13 @@
 use crate::air::HashChainAir;
 use crate::merkle::MerkleTree;
+use crate::stark::StarkProof;
 use crate::{field::F, prover::Proof};
 pub struct Verifier;
 impl Verifier {
     pub fn new() -> Self {
         Self
     }
+
     pub fn verify(
         &self,
         proof: &Proof,
@@ -36,6 +38,33 @@ impl Verifier {
             length: expected_length,
         };
         HashChainAir::new(expected_length).verify(&trace, inputs)
+    }
+
+    pub fn verify_stark(
+        &self,
+        proof: &StarkProof,
+        expected_root: F,
+        expected_length: usize,
+        inputs: &[F],
+    ) -> bool {
+        if proof.public_inputs.len() != inputs.len() {
+            return false;
+        }
+        if proof
+            .public_inputs
+            .iter()
+            .zip(inputs.iter())
+            .any(|(a, b)| a != b)
+        {
+            return false;
+        }
+
+        let legacy_proof = Proof {
+            root: proof.commitment,
+            openings: proof.openings.clone(),
+            length: proof.length,
+        };
+        self.verify(&legacy_proof, expected_root, expected_length, inputs)
     }
 }
 mod tests {

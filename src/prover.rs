@@ -1,4 +1,5 @@
 use crate::merkle::{MerkleProof, MerkleTree};
+use crate::stark::StarkProof;
 use crate::{air::HashChainAir, field::F, trace::Trace};
 pub struct Prover {
     air: HashChainAir,
@@ -33,6 +34,11 @@ impl Prover {
             length: trace.length,
         }
     }
+
+    pub fn prove_stark(&self, trace: &Trace, public_inputs: &[F]) -> StarkProof {
+        let proof = self.prove(trace, public_inputs);
+        StarkProof::from_proof(&proof, public_inputs.to_vec())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -41,6 +47,7 @@ pub struct TraceOpening {
     pub proof: MerkleProof,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Proof {
     pub root: F,
     pub openings: Vec<TraceOpening>,
@@ -48,7 +55,7 @@ pub struct Proof {
 }
 mod tests {
     use super::*;
-    
+    use crate::field::BaseElement as F;
     use crate::hash_chain::HashChain;
     use crate::trace::Trace;
 

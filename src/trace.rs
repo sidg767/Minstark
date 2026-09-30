@@ -16,6 +16,8 @@ impl Trace {
 }
 mod tests {
     use super::*;
+    use crate::field::BaseElement as F;
+    use crate::hash_chain::HashChain;
     #[test]
     fn test_trace_from_chain() {
         let seed = F::new(1);
